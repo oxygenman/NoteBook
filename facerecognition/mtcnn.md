@@ -41,7 +41,7 @@ $$
 
 - **图像金字塔的作用**
 
-  因为待测试的图像中人脸的大小是不确定的，为了获取到包含合适人脸候选框，就在不同尺度的输入图像中截取相同大小的patch.是为了解决目标检测过程中目标尺度变化的问题。其缺点是图像的预处理过程比较耗时，特别是当输入图片较大时更耗时，从而影响推理速度。
+  因为待测试的图像中人脸的大小是不确定的，为了获取到包含合适人脸候选框，不同尺度的输入图像.是为了解决目标检测过程中目标尺度变化的问题。其缺点是图像的预处理过程比较耗时，特别是当输入图片较大时更耗时，从而影响推理速度。
 
   [解决目标多尺度问题的几种方法](https://zhuanlan.zhihu.com/p/92005927)
 
@@ -500,6 +500,8 @@ $$
 ## 参考:
 
 [论文链接:Joint Face Detection and Alignment using Multi-task Cascaded Convolutional Networks](https://arxiv.org/pdf/1604.02878.pdf) 
+
+[mtcnn tensorflow版github](https://github.com/AITTSMD/MTCNN-Tensorflow)
 
 [FPN以及其他几种解决多尺度问题的方法](https://zhuanlan.zhihu.com/p/92005927)
 
