@@ -84,9 +84,11 @@ class MultiBoxLoss(nn.Module):
         num_pos_landm = pos1.long().sum(1, keepdim=True)
         #batch 中所有正样本的个数
         N1 = max(num_pos_landm.data.sum().float(), 1)
+        #numpriors->[numpriors,10]
         pos_idx1 = pos1.unsqueeze(pos1.dim()).expand_as(landm_data)
         landm_p = landm_data[pos_idx1].view(-1, 10)
         landm_t = landm_t[pos_idx1].view(-1, 10)
+        #计算landmark的loss
         loss_landm = F.smooth_l1_loss(landm_p, landm_t, reduction='sum')
 
 
@@ -261,7 +263,179 @@ def match(threshold, truths, priors, variances, labels, landms, loc_t, conf_t, l
     landm_t[idx] = landm
 ```
 
+softmax 损失函数
 
+```python
+ loss_c = log_sum_exp(batch_conf) - batch_conf.gather(1, conf_t.view(-1, 1))
+ 
+ def log_sum_exp(x):
+    """Utility function for computing log_sum_exp while determining
+    This will be used to determine unaveraged confidence loss across
+    all examples in a batch.
+    Args:
+        x (Variable(tensor)): conf_preds from conf layers
+    """
+    x_max = x.data.max()
+    return torch.log(torch.sum(torch.exp(x-x_max), 1, keepdim=True)) + x_max
+
+```
+
+softmax损失是交叉熵和softmax的结合
+
+对于一个单样本的情况:
+
+交叉熵:$L_{1}=-\sum_{j=1}^{C} y_{j} \log p_{j}$ 
+
+对于一个二分类任务来说,C=2,设当前样本X1属于类A,则y=(1,0),设P=(0.9,0.1),则交叉熵为:
+
+$L=-\left(1 * \log p_{1}+0 * \log p_{2}\right)=-\log p_{1}=-\log 0.9$
+
+这里可以看到,实际上只有当前样本X1对应的类计算出来是有值的 (1*logp1),其他的项都是0,扩展到多分类也一样,
+
+所以交叉熵公式可以简化为:
+
+$L=-\log p_{i}$
+
+对于一个批次的样本则为: $L=\frac{1}{n} \sum_{i=1}^{n}\left(-\log p_{i}\right)$ 
+
+那么softmax loss 是什么呢?
+
+$L=\frac{1}{n} \sum_{i=1}^{n}\left(-\log \frac{e^{p_{i}}}{\sum_{j=1}^{C} e^{p_{j}}}\right)$
+
+很简单,就是用交叉熵包裹softmax激活函数.
+
+展开一下:
+$$
+\begin{aligned}
+\log \left(\frac{e^{x_{j}}}{\sum_{i=1}^{n} e^{x_{i}}}\right) &=\log \left(e^{x_{j}}\right)-\log \left(\sum_{i=1}^{n} e^{x_{i}}\right) \\
+&=x_{j}-\log \left(\sum_{i=1}^{n} e^{x_{i}}\right)
+\end{aligned}
+$$
+一个小trick:
+$$
+\begin{aligned}
+\log \operatorname{Sum} \operatorname{Exp}\left(x_{1} \ldots x_{n}\right) &=\log \left(\sum_{i=1}^{n} e^{x_{i}}\right) \\
+&=\log \left(\sum_{i=1}^{n} e^{x_{i}-c} e^{c}\right) \\
+&=\log \left(e^{c} \sum_{i=1}^{n} e^{x_{i}-c}\right) \\
+&=\log \left(\sum_{i=1}^{n} e^{x_{i}-c}\right)+\log \left(e^{c}\right) \\
+&=\log \left(\sum_{i=1}^{n} e^{x_{i}-c}\right)+c
+\end{aligned}
+$$
+这么做的目的是为了防止指数爆炸.
+
+则 softmax loss 为
+
+$-\log (\operatorname{Softmax}())=\log \left(\sum_{i=1}^{n} e^{x_{i}-c}\right)+c-x_{j}$ 
+
+即代码:
+
+```python
+loss_c = log_sum_exp(batch_conf)- batch_conf.gather(1, conf_t.view(-1,1))
+```
+
+![img](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/v2-bbd4481c30a8d0d6a4e9dccff4c3e617_720w.jpg)
+
+
+
+widerface.py
+
+```python
+class WiderFaceDetection(data.Dataset):
+    def __init__(self, txt_path, preproc=None):
+        self.preproc = preproc
+        self.imgs_path = []
+        self.words = []
+        f = open(txt_path,'r')
+        lines = f.readlines()
+        isFirst = True
+        labels = []
+        for line in lines:
+            line = line.rstrip()
+            if line.startswith('#'):
+                if isFirst is True:
+                    isFirst = False
+                else:
+                    labels_copy = labels.copy()
+                    self.words.append(labels_copy)
+                    labels.clear()
+                path = line[2:]
+                path = txt_path.replace('label.txt','images/') + path
+                self.imgs_path.append(path)
+            else:
+                line = line.split(' ')
+                label = [float(x) for x in line]
+                labels.append(label)
+
+        self.words.append(labels)
+
+    def __len__(self):
+        return len(self.imgs_path)
+
+    def __getitem__(self, index):
+        img = cv2.imread(self.imgs_path[index])
+        height, width, _ = img.shape
+
+        labels = self.words[index]
+        annotations = np.zeros((0, 15))
+        if len(labels) == 0:
+            return annotations
+        '''
+        # return annotations
+            annotation = np.zeros((1, 15))
+            # bbox
+            annotation[0, 0] = 0  # x1
+            annotation[0, 1] = 0  # y1
+            annotation[0, 2] = 0  # x2
+            annotation[0, 3] = 0  # y2
+
+            # landmarks
+            annotation[0, 4] = -1  # l0_x
+            annotation[0, 5] = -1   # l0_y
+            annotation[0, 6] = -1   # l1_x
+            annotation[0, 7] = -1   # l1_y
+            annotation[0, 8] = -1   # l2_x
+            annotation[0, 9] = -1   # l2_y
+            annotation[0, 10] = -1   # l3_x
+            annotation[0, 11] = -1   # l3_y
+            annotation[0, 12] = -1   # l4_x
+            annotation[0, 13] = -1   # l4_y
+            annotation[0, 14] = 0
+            annotations = np.append(annotations, annotation, axis=0)
+            target = np.array(annotations)
+        '''
+        
+        
+        for idx, label in enumerate(labels):
+            annotation = np.zeros((1, 15))
+            # bbox
+            annotation[0, 0] = label[0]  # x1
+            annotation[0, 1] = label[1]  # y1
+            annotation[0, 2] = label[0] + label[2]  # x2
+            annotation[0, 3] = label[1] + label[3]  # y2
+
+            # landmarks
+            annotation[0, 4] = label[4]    # l0_x
+            annotation[0, 5] = label[5]    # l0_y
+            annotation[0, 6] = label[7]    # l1_x
+            annotation[0, 7] = label[8]    # l1_y
+            annotation[0, 8] = label[10]   # l2_x
+            annotation[0, 9] = label[11]   # l2_y
+            annotation[0, 10] = label[13]  # l3_x
+            annotation[0, 11] = label[14]  # l3_y
+            annotation[0, 12] = label[16]  # l4_x
+            annotation[0, 13] = label[17]  # l4_y
+            if (annotation[0, 4]<0):
+                annotation[0, 14] = -1
+            else:
+                annotation[0, 14] = 1
+
+            annotations = np.append(annotations, annotation, axis=0)
+        target = np.array(annotations)
+        if self.preproc is not None:
+            img, target = self.preproc(img, target)
+
+        return torch.from_numpy(img), target
+```
 
 
 
