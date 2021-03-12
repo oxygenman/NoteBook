@@ -16,7 +16,7 @@ $$
 
 Retinaface中Multi-task Loss 分为四个部分:
 
-(1)  $L_{c l s}\left(p_{i}, p_{i}^{*}\right):$  为softmax损失函数,即先算softmax,再算交叉熵.其中$p_i$为第i个priorbox是人脸的概率,$p_{i}^*$为groundtruth类别标签,当为人脸时为1,不是人脸时是0.
+(1)  $L_{c l s}\left(p_{i}, p_{i}^{*}\right):$  为softmax损失函数,即先算softmax,再算交叉熵.其中$p_i$为第i个priorbox是人脸的概率,$p_{i}^*$为groundtruth类别标签.
 
 (2)$L_{b o x}\left(t_{i}, t_{i}^{*}\right):$  为smooth-L1 loss,用来回归检测框.
 
@@ -147,6 +147,8 @@ class MultiBoxLoss(nn.Module):
 1.如果只使用第一个原则,那么匹配到的正样本先验框的个数就等于ground truth 框的个数.正样本就太少了.
 
 2.一个ground truth框 匹配一个先验框是不合理的.一个ground truth 框的周围会有很多的先验框,如果只使用一个先验框在训练的时候就比较难回归到这个框上.但是如果有多个先验框的话,网络的输出就容易匹配到其中一个.
+
+3.一个priorbox  对应多个groudtruth.
 
 ![img](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/v2-174bec5acd695bacbdaa051b730f998a_720w.jpg)
 
