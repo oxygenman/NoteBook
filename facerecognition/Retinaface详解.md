@@ -381,11 +381,11 @@ class WiderFaceDetection(data.Dataset):
         annotations = np.zeros((0, 15))
         if len(labels) == 0:
             return annotations
-        '''
+
         '''#给无标签数据打上全为0的标签
             annotations=np.append(annotations,np.zeros((1,15)),axis=0)
             target = np.array(annotations)
-        '''	
+        '''
         
         for idx, label in enumerate(labels):
             annotation = np.zeros((1, 15))
