@@ -31,3 +31,13 @@
 ### 逻辑斯蒂回归
 
 ![img](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/1532331041221.png)
+
+### svm
+
+ 
+
+[强对偶性、弱对偶性以及KKT条件的证明](https://blog.csdn.net/Cyril_KI/article/details/107741019)
+
+[从凸优化聊到SVM对偶式的推导](https://zhuanlan.zhihu.com/p/91267375)
+
+[深入理解SVM---从头到尾详细推导（软硬间隔、KKT条件、核技巧）](https://blog.csdn.net/Cyril_KI/article/details/107601621)
