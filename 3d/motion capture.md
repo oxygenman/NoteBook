@@ -208,9 +208,45 @@ $t_{i}^{\prime}=\sum_{k=1}^{K} w_{k, i} G_{k}^{\prime}(\vec{\theta}, J(\vec{\bet
 
 $t_{P, i}(\vec{\beta}, \vec{\theta} ; \bar{T}, \mathcal{S}, \mathcal{P})=\bar{t}_{i}+\sum_{m=1}^{|\beta|} \vec{\beta} s_{m, i}+\sum_{n=1}^{9 K}\left(R_{n}(\vec{\theta})-R_{n}\left(\overrightarrow{\theta^{*}}\right)\right) p_{n, i}$ 
 
+#### 训练
 
+SMPL参数的训练过程是在shape和pose数据集上最小化重建误差得到的。
 
+- multi-pose数据集用来训练$\mathcal{S}$,包含40个人的1786个registration(registration是指对齐好的mesh)。
+- multi-shape数据集用来训练$\mathcal{P}$,数据来自数据集CAESA,包含1700个男性registration和2100个女性registration。
 
+现在分别使用$V_j^P$ 和 $V_j^S$ 表示multi-pose和 multi-shape数据集中的第j个mesh。
+
+- 需要优化的参数是：$\Phi=\{\overline{T},\mathcal{W},\mathcal{S},\mathcal{J},\mathcal{P}\}$
+
+- 优化目标是最小化顶点重建误差；
+
+  文章中首先使用multi-pose数据集优化$\{\mathcal{J},\mathcal{W},\mathcal{P}\}$,然后使用multi-shape数据集优化$\{\overline{T},\mathcal{S}\}$ 。
+
+  男性和女性的模型分别优化，分别得到$\Phi_m$ 和 $\Phi_f$ 。
+
+(1) Pose Parameter Training
+
+pose parameter主要是训练$\{\{{\mathcal{J},\mathcal{W},\mathcal{P}}\}$(joint location predict, blend weight和pose displacement)。为了达到这个目的，我们需要计算每个rest templates,$\hat{T}_i^P$ 和连接点位置，$\hat{J}_i^P$ 还有每个registration的的pose parameters $\vec{\theta_j}$. 前面已经说过multi-pose数据集包含了40个人的1786个registration，这里用下标$i$ 表示第$i$个人，下标$j$表示第$j$个registration。在pose数据集中，不同的registration的姿态是不同的，表示为$\vec{\theta}_j$ .
+
+根据前面说的$W(.):$
+
+$\begin{aligned}
+M(\vec{\beta}, \vec{\theta}) &=W\left(T_{P}(\vec{\beta}, \vec{\theta}), J(\vec{\beta}), \vec{\theta}, \mathcal{W}\right)\end{aligned} $
+
+这里可以写出在pose数据集上$W(.)$的形式为：
+
+$\left.W\left(\hat{T}_{s(j)}^{P}+B_{P}(\vec{\theta} ; \mathcal{P}), \vec{\theta}\right), \hat{J}_{s(j)}^{P}, \vec{\theta}, \mathcal{W}\right)$
+
+其中：
+
+- $\hat{T}_{s(j)}^P$ 表示pose数据集中第j个mesh所对应的人物的rest template;
+
+- $\hat{J}_{s(j)}^P$ 表示pose数据集中第j个mesh所对应的人物的joint location.
+
+- $B_P(\vec{\theta};\mathcal{P})$ 前面说过，是在$\vec{\theta},\mathcal{P}$的作用下产生的顶点形变；
+
+  
 
 #### Keep it SMPL: Automatic Estimation of 3D Human Pose and Shape from a Single Image(SMPLify)
 
