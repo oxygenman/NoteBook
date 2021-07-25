@@ -40,11 +40,9 @@ which defines the corrections in a rest pose and then applies a standard skinnin
 
 The idea is to define corrective shapes (sculpts) for specific key poses, so that when added to the base shape and transformed by blend skinning, produce the right shape.
 
-为特定的关键pose定义修正形状（雕刻）,并添加到base shape,使用blend skinning进行变形，最终产生正确的形状。
+为特定的关键pose定义修正形状（雕刻）,并添加到base shape,使用blend skinning进行变形，最终产生正确的形状。这一过程之前通常是人工来实现的，非常的繁琐，耗时。
 
-Typically one finds the distance (in pose space) to the exemplar poses and uses a function, e.g. a Radial Basis (RBF) kernel [Lewis et al. 2000], to weight the exemplars non-linearly based on distance. The sculpted blend shapes are then weighted and linearly combined.
-
-大致意思是计算pose和经典pose的距离，然后生成 sculpted blend shapes，并将这些模型进行线性结合生成最终的shape.
+A blend shape is a vector of vertex displacements in a rest pose
 
 #### 整体建模：
 
@@ -240,27 +238,133 @@ $\left.W\left(\hat{T}_{s(j)}^{P}+B_{P}(\vec{\theta} ; \mathcal{P}), \vec{\theta}
 
 其中：
 
-- $\hat{T}_{s(j)}^P$ 表示pose数据集中第j个mesh所对应的人物的rest template;
+- $\hat{T}_{s(j)}^P$ 表示pose数据集中第j个mesh所对应的人物的rest template（是人工设计的）;
 
-- $\hat{J}_{s(j)}^P$ 表示pose数据集中第j个mesh所对应的人物的joint location.
+- $\hat{J}_{s(j)}^P$ 表示pose数据集中第j个mesh所对应的人物的joint location（同上）.
 
 - $B_P(\vec{\theta};\mathcal{P})$ 前面说过，是在$\vec{\theta},\mathcal{P}$的作用下产生的顶点形变；
 
-  
+  综合上面所说的$W(.)$ 的过程就是当前（第j个）mesh 所属人物在姿态$\vec{\theta}$ 作用下产生的变形，而这个变形的过程涉及到的一些参数是需要学习的，这里就是$\mathcal{P}$ 和 $\mathcal{W}$ 。变形之后得到一个新的mesh,学习的目标就是找到最佳的参数使变形之后的的结果mesh和数据集中对齐好的mesh之间的差异最小。
+
+  为了完成这个学习过程，定义一个包含数据项和正则项的目标函数：
+
+  $E = E_D + \lambda_YE_Y + \lambda_JE_J + \lambda_PE_P + E_W$
+
+  其中：
+
+  - $E_D$ 是数据项，就是上面说的经过变形后的mesh与已经对齐的mesh顶点之间的差异；
+  - $E_Y$是对称正则项；
+  - $E_J$ 是joint正则项；
+  - $E_P$ 是$\mathcal{P}$ 正则项；
+  - $E_W$ 是$\mathcal{W}$ 正则项；
+
+  下面对目标函数中的这几项分别进行阐述：
+
+  （1）$E_D$
+
+  $\left.E_{D}\left(\hat{T}^{P}, \hat{J}^{P}, \mathcal{W}, \mathcal{P}, \Theta\right)=\sum_{j=1}^{P_{r e g}} \| V_{j}^{P}-W\left(\hat{T}_{s(j)}^{P}+B_{P}(\vec{\theta} ; \mathcal{P}), \vec{\theta}\right), \hat{J}_{s(j)}^{P}, \vec{\theta}, \mathcal{W}\right) \|^{2}$
+
+  其中：
+
+  $\Theta = {\vec{\theta_1},...,\vec{\theta_{P_{reg}}}}$ ,$P_reg$ 是pose训练集中registration的数目；
+
+  $P_{subj}$ 是训练集中人物的数目；
+
+  $\hat{T}^P=\{\hat{T}_i^P\}_{i=1}^{P_{subj}}$ ,是训练集中mesh template的集合。
+
+  $\hat{J}^P = \{\hat{J}_i^P\}_{i=1}^{P_{subj}}$ 是mesh template的joint的集合。
+
+  （2）$E_Y$
+
+  $E_Y$是对称正则项，也就是激励template mesh和joint为对称的，对左右不对称的情况进行惩罚：
+
+  $E_{Y}\left(\hat{J}^{P}, \hat{T}^{P}\right)=\sum_{i=1}^{P_{\text {subj }}} \lambda_{U}|| \hat{J}_{i}^{P}-U\left(\hat{J}_{i}^{P}\right)\left\|^{2}+\right\| \hat{T}_{i}^{P}-U\left(\hat{T}_{i}^{P}\right) \|^{2}$
+
+  其中 U ( T ) U(T)U(T)的作用是沿着矢状面(sagittal plane 指将躯体纵断为左右两部分的解剖平面)左右翻转人体；
+
+  (3)$E_J$
+
+  文中将人体分割为24个部分，根据这个分割情况可以得到不同部分之间的连接的一个“顶点序列”，是一个环状的顶点集合，使用一个回归器$\mathcal{J}_I$  计算joint的初始中心，实际上就是对这个顶点集合里面的顶点的坐标做平均。当估计joint中心的时候，锁甲的正则项就是让估计的中心接近这个初始中心：
+  $E_{J}\left(\hat{T}^{P}, \hat{J}^{P}\right)=\sum_{i=1}^{P_{s w b j}}\left\|\mathcal{J}_{I} \hat{T}_{i}^{P}-\hat{J}_{i}^{P}\right\|^{2}$
+
+  (4)$E_P$
+
+  为了防止pose-dependent blend shape的过拟合，这里对$\mathcal{P}$也做了一个正则化，使其趋向于0：
+
+  为了防止pose-dependent blend shape的过拟合，这里对P \mathcal{P}P也做了一个正则化，使其趋向于0：
+
+  $E_P(P)=||\mathcal{P}||_F^2$
+
+
+  其中$||·||_F$是Frobenius范数，实际上就是矩阵中对应元素的平方和再开平方.
+
+  (5)$E_W$
+
+  根据人体的分割结果，通过"diffus"可以得到一个初始的blend weight于$\mathcal{W}_I$
+   ,现在添加一个正则项使$\mathcal{W}$趋向于$\mathcal{W}_I$
+  $E_W(\mathcal{W})=||\mathcal{W}-\mathcal{W}_I||_F^2$
+  	
+
+  #### Joint Regressor
+
+  通过上面的优化过程可以得到训练集中每个人物的template mesh和joint location。但是如果我们想为新的人物预测其关节位置呢？文章中通过学习一个regressor matrix $ \mathcal{J}$预测Joint位置。$\mathcal{J}$通过非负最小二乘计算得到，并使权重加起来为1。这种方法使得计算joint的顶点是稀疏的，同时权重非负和加起来为1又使得预测的joint不会出现在mesh的外侧。
+
+  (2)Shape parameter training
+
+  shape 空间是通过"mean and principal shape direction" $\{\overline{T},\mathcal{S}\}$来定义的。计算方法multi-pose数据集中shape做一个pose归一化，然后再运行PCA得到。
+  pose归一化的过程是将数据集中的registration $ V_j^S$转换为一个处于rest pose $\vec{\theta^*} $下的registration $ \hat{T}_j^S $;转为rest pose这一步保证了pose和shape的建模不会相互影响。那么如何进行pose归一化呢？对于数据集中的一个一个registration  $V_j^S$,首先要估计它的姿势，也就是要寻找一个姿势表示$\vec{\theta}$
+   使得经过这个参数变换后的mesh和原始的mesh的误差最小，也就是优化：
+  $\vec{\theta}_j = \mathop{\arg\min}_{\vec{\theta}} \sum_{e}||W_e(\hat{T}_{\mu}^P+B_P(\vec{\theta};\mathcal{P})),\hat{J}_{mu}^P,\vec{\theta},\mathcal{W} - V_{j,e}^S||^2$
+
+
+  其中：
+
+   $\hat{T}_{\mu}^P $是multi-pose数据集中的mean pose;
+  $P \hat{J}_{\mu}^P $是multi-pose数据集中的mean joint location;
+  $V_{j,e}^S \in \mathbb{R}^3$“an edge of the registration”，是通过一对相邻顶点之间相减得到的，就是当前shape和mean shape的对应顶点坐标相减。通过对mesh中的所有的edge求和，可以在不知道人物具体的shape的情况下求得一个姿态的较好估计。
+  得到姿态 $\vec{T}_j^S$	之后，可以求 $\hat{T}_j^S$
+
+  $\hat{T}_j^S = \mathop{\arg\min}_{\vec{T}}||W(\hat{T}+B_p(\vec{\theta}_j;\mathcal{P}),\mathcal{J}\hat{T},\vec{\theta},\mathcal{W}) - V_j^S||^2$
+
+
+  然后在$\{\hat{T}_j^S\}_{j=1}^{S_{subj}}$ 上运行PCA,得到 $\{\overline{T},\mathcal{S}\}$PCA这一步是为了最大大rest pose下顶点偏移的可解释方差(explained variance)，同时使shape direction的数目较少。
+
+
+
 
 #### Keep it SMPL: Automatic Estimation of 3D Human Pose and Shape from a Single Image(SMPLify)
 
+### Abstract:
+
+本文使用一张2d人体图像拟合出人体的3d形状和3d姿态。先使用DeepCut检测出2d人体关键点，然后再将3d人体模型SMPL和2d关键点拟合。拟合是通过最小化2d关键点和3d关键点间的误差实现的。
+
+### Introduction:
+
+使用3d人体模型的好处：
+
+1.能够获得身体形状信息
+
+2.可以reason aboout interpenetration问题,即2d映射到3d的过程中会出现一些不可能的姿势。之前的一些工作使用3d棍图（stick figures）就可能出现这些问题。可以通过一个胶囊模型（“capsules”）来解决interpenetration的问题。
+
+为了解决pose的二义性，还需要pose prior.
+
+
+
 method:
 
-$J(\beta)$ :利用shap参数$\beta$ 预测3D 关键点
+![image-20210723151425435](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210723151425435.png)
+
+Fig.2展示了系统的整体流程，输入一张2d图片，使用DeepCut 预测出2D关键点，$J_{est}$ . 每一个关键点$i$ 会提供一个置信度$w_i$.然后和3d模型的3d关键点进行拟合，拟合出3d模型。
+
+
+
+$J(\beta)$ :利用shap参数$\beta$ ，预测shape,然后再通过shape, 预测3D 关键点.
 
 通过一个全局刚性变换，可以控制关节摆出任意姿势。
 
-$R_\theta(J(\beta)_i)$ :代表第$i$个3d关节点。$R_\theta$ 代表由pose参数$\theta$ 推导出来的刚性变换。
+$R_\theta(J(\beta)_i)$ :代表第$i$个3d关节点的坐标，表示加上pose之后的关键点位置。。$R_\theta$ 代表由pose参数$\theta$ 推导出来的刚性变换。
 
-我们将DeepCut生成的关键点和SMPL的关节点关联起来。
-
-为了将3D投影到2D，我们使用了一个投影相机模型，使用参数K控制。
+我们将DeepCut生成的关键点和SMPL的关节点关联起来，为了将3D投影到2D，我们使用了一个投影相机模型，使用参数K控制。
 
 3.1使用胶囊近似身体
 
@@ -274,20 +378,26 @@ $R_\theta(J(\beta)_i)$ :代表第$i$个3d关节点。$R_\theta$ 代表由pose参
 
 $E(\beta,\theta)=E_{J}\left(\boldsymbol{\beta}, \boldsymbol{\theta} ; K, J_{\text {est }}\right)+\lambda_{\theta} E_{\theta}(\boldsymbol{\theta})+\lambda_{a} E_{a}(\boldsymbol{\theta})+\lambda_{s p} E_{s p}(\boldsymbol{\theta} ; \boldsymbol{\beta})+\lambda_{\beta} E_{\beta}(\boldsymbol{\beta})$
 
-一个关节点项，三个姿态priors,一个形状prior.
+一个关节点项，三个姿态先验,一个形状先验.
 
 $E_{J}\left(\boldsymbol{\beta}, \boldsymbol{\theta} ; K, J_{\text {est }}\right)=\sum_{\text {joint } i} w_{i} \rho\left(\Pi_{K}\left(R_{\theta}\left(J(\boldsymbol{\beta})_{i}\right)\right)-J_{\text {est }, i}\right)$ 
 
-关节点项惩罚2d关键点和投影关键点之间的距离。
+关节点项惩罚2d关键点和投影关键点之间的距离。其中$\Pi_{K}$ 表示利用相机参数K,将3D关键点投影到2D关键点，$w_i$ 为上文提到的关键点的置信度。对于遮蔽的关键点，置信度往往是比较低的，在这种情况下pose是由 pose prior实现的。同时为了印制噪音，使用了鲁棒代价函数Geman-McClure ，$\rho$ .
 
-$E_{a}(\boldsymbol{\theta})=\sum_{i} \exp \left(\boldsymbol{\theta}_{i}\right)$  惩罚手肘和膝盖的不正常弯曲。
+$E_{a}(\boldsymbol{\theta})=\sum_{i} \exp \left(\boldsymbol{\theta}_{i}\right)$ 
+
+ 惩罚手肘和膝盖的不正常弯曲。因为在关节不弯曲的情况下，角度$\theta_i$ 是零，正常弯曲时角度为负，不正常弯曲时角度为正。
 
 pose prior:
+
+和之前的许多工作一样，使用CMU 数据集来训练pose prior.为了构造先验，我们使用MoSh将CMU marker data 拟合到SMPL,获得poses.然后使用一个混合高斯模型，去拟合100个subjects的100万姿势。
 
 $\begin{aligned}
 E_{\theta}(\boldsymbol{\theta}) \equiv-\log \sum_{j}\left(g_{j} \mathcal{N}\left(\boldsymbol{\theta} ; \boldsymbol{\mu}_{\theta, j}, \Sigma_{\theta, j}\right)\right) & \approx-\log \left(\max _{j}\left(c g_{j} \mathcal{N}\left(\boldsymbol{\theta} ; \boldsymbol{\mu}_{\theta, j}, \Sigma_{\theta, j}\right)\right)\right) \\
 &=\min _{j}\left(-\log \left(c g_{j} \mathcal{N}\left(\boldsymbol{\theta} ; \boldsymbol{\mu}_{\theta, j}, \Sigma_{\theta, j}\right)\right)\right)
 \end{aligned}$
+
+其中，$g_j$ 是混合N=8的高斯模型的权重
 
 capsule approximation:
 
