@@ -8,6 +8,18 @@
 
 [单目实时全身动作捕捉](https://zhuanlan.zhihu.com/p/374389244)
 
+### 什么是人体数字模型？
+
+早期人体模型
+
+<img src="https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210729155257075.png" alt="image-20210729155257075" style="zoom:33%;" /><img src="https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210729155410583.png" alt="image-20210729155410583" style="zoom:33%;" /><img src="https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210729155520206.png" alt="image-20210729155520206" style="zoom:33%;" />
+
+<img src="https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210729164731804.png" alt="image-20210729164731804" style="zoom: 33%;" />
+
+
+
+![image-20210729170243453](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210729170243453.png)
+
 ### SMPL(skinned multi-person linear model)
 
 SMPL模型是一种参数化人体模型，是马普所提出的一种人体建模方法，该方法可以进行任意的人体建模和动画驱动。
@@ -16,33 +28,19 @@ smpl是一种skinned的，基于顶点（vertex-based）的人体三维模型，
 
 smpl适用于动画领域，可以随姿态变化自然的变形，并伴随软组织的自然运动。
 
-smpl是一种可学习的模型，通过训练可以更好的拟合人体的形状和不同姿态下的形变。
+smpl是一种从数据中学习到的模型，通过训练可以更好的拟合人体的形状和不同姿态下的形变。
 
-模型学习使用到的数据：静息姿态模板，混合权重，不同姿态的混合形状，不同个体的混合形状。
-
-Specifically we learn blend shapes to correct for the limitations of standard skinning. Different blend shapes for identity, pose, and soft-tissue dynamics are additively combined with a rest template before being transformed by blend skinning. 
+模型需要从数据中学习到的参数：静息姿态模板，混合权重，不同姿态的混合形状，不同个体的混合形状，从顶点到连接点的回归器。
 
  A key component of our approach is that we formulate the pose blend shapes as a linear function of the elements of the part rotation matrices
 
 #### 相关概念：
 
-Blend Skinning . skeleton subspace deformation methods, also known as blend skinning, attach the surface of a mesh to an ubderlying skeletal structure.
+**Blend Skinning ：**骨架子空间变形方法，将mesh上的点与骨架进行绑定，mesh上的每个vertex都以一定的权重和骨架相连，所以使用骨架可以控制mesh的形变，vetex受到与他相邻的估计的加权影响，这种影响可以通过LBS来实现。
 
-骨架子空间变形方法，将mesh上的点与骨架进行绑定，mesh上的每个vertex都以一定的权重和骨架相连，所以使用骨架可以控制mesh的形变，vetex受到与他相邻的估计的加权影响，这种影响可以通过LBS来实现。
+**Auto-rigging:**自动的生成LBS的权重，否则需要人工绑定。take a collection of meshes and infer the bones as well as the joints and blend weights 。
 
-Auto-rigging:
-
-自动的生成LBS的权重，否则需要人工绑定。take a collection of meshes and infer the bones as well as the joints and blend weights 。
-
-Blend shapes:
-
-which defines the corrections in a rest pose and then applies a standard skinning equation (e.g. LBS).先对rest pose 进行修正，然后再使用标准的skinning方法，（比如LBS）.
-
-The idea is to define corrective shapes (sculpts) for specific key poses, so that when added to the base shape and transformed by blend skinning, produce the right shape.
-
-为特定的关键pose定义修正形状（雕刻）,并添加到base shape,使用blend skinning进行变形，最终产生正确的形状。这一过程之前通常是人工来实现的，非常的繁琐，耗时。
-
-A blend shape is a vector of vertex displacements in a rest pose
+**Blend shapes**:A blend shape is a vector of vertex displacements in a rest pose,blend shape 就是顶点相对rest template的偏移量。这种偏移可以由体型的变化引起，也有可能是因为身体姿态的改变引起，所以可以分为 shape blend shape 和 pose blend shape.
 
 #### 整体建模：
 
@@ -113,9 +111,9 @@ G_{k}(\vec{\theta}, \mathbf{J}) &=\prod_{j \in A(k)}\left[\begin{array}{c|c}
 \end{array}\right]
 \end{aligned}$ 
 
-$G_{k}^{\prime}(\vec{\theta}, \mathbf{J})$ 就是根据pose $\vec{\theta}$ 和原始链接点$J$ 转换生成新的连接点位置。
+其中$w_{k,i}$是blend weight ,表示 身体部位k的旋转对定点i的位移影响程度；$exp(\vec{w_j})$  表示连接点j对应的3x3的旋转矩阵；$G_K(\vec{\theta ,\mathbf J})$表示的连接点k的世界变换，$G_{k}^{\prime}(\vec{\theta}, \mathbf{J})$ 也表示世界变换，但是是移除了静息状态变换后的变换。
 
-$A(k)$ 表示连接点k的有序父节点集合。
+$J_j$ 表示单个连接点的坐标；$A(k)$ 表示连接点k的有序父节点集合。
 
 为了保证兼容性，我们使用最基本的蒙皮方法，并且学习一个function用来预测连接点的坐标，那最终model的形式，如下：
 
@@ -223,7 +221,7 @@ SMPL参数的训练过程是在shape和pose数据集上最小化重建误差得�
 
   男性和女性的模型分别优化，分别得到$\Phi_m$ 和 $\Phi_f$ 。
 
-(1) Pose Parameter Training
+#### (1) Pose Parameter Training
 
 pose parameter主要是训练$\{\{{\mathcal{J},\mathcal{W},\mathcal{P}}\}$(joint location predict, blend weight和pose displacement)。为了达到这个目的，我们需要计算每个rest templates,$\hat{T}_i^P$ 和连接点位置，$\hat{J}_i^P$ 还有每个registration的的pose parameters $\vec{\theta_j}$. 前面已经说过multi-pose数据集包含了40个人的1786个registration，这里用下标$i$ 表示第$i$个人，下标$j$表示第$j$个registration。在pose数据集中，不同的registration的姿态是不同的，表示为$\vec{\theta}_j$ .
 
@@ -270,13 +268,13 @@ $\left.W\left(\hat{T}_{s(j)}^{P}+B_{P}(\vec{\theta} ; \mathcal{P}), \vec{\theta}
 
   $P_{subj}$ 是训练集中人物的数目；
 
-  $\hat{T}^P=\{\hat{T}_i^P\}_{i=1}^{P_{subj}}$ ,是训练集中mesh template的集合。
+  $\hat{T}^P=\{\hat{T}_i^P\}_{i=1}^{P_{subj}}$ ,是训练集中rest mesh template的集合，是需要学习的。
 
-  $\hat{J}^P = \{\hat{J}_i^P\}_{i=1}^{P_{subj}}$ 是mesh template的joint的集合。
+  $\hat{J}^P = \{\hat{J}_i^P\}_{i=1}^{P_{subj}}$ 是mesh template的joint的集合,是需要学习的。
 
   （2）$E_Y$
 
-  $E_Y$是对称正则项，也就是激励template mesh和joint为对称的，对左右不对称的情况进行惩罚：
+  $E_Y$是对称正则项，也就是激励template mesh的joint为对称的，对左右不对称的情况进行惩罚：
 
   $E_{Y}\left(\hat{J}^{P}, \hat{T}^{P}\right)=\sum_{i=1}^{P_{\text {subj }}} \lambda_{U}|| \hat{J}_{i}^{P}-U\left(\hat{J}_{i}^{P}\right)\left\|^{2}+\right\| \hat{T}_{i}^{P}-U\left(\hat{T}_{i}^{P}\right) \|^{2}$
 
@@ -291,8 +289,6 @@ $\left.W\left(\hat{T}_{s(j)}^{P}+B_{P}(\vec{\theta} ; \mathcal{P}), \vec{\theta}
 
   为了防止pose-dependent blend shape的过拟合，这里对$\mathcal{P}$也做了一个正则化，使其趋向于0：
 
-  为了防止pose-dependent blend shape的过拟合，这里对P \mathcal{P}P也做了一个正则化，使其趋向于0：
-
   $E_P(P)=||\mathcal{P}||_F^2$
 
 
@@ -305,13 +301,13 @@ $\left.W\left(\hat{T}_{s(j)}^{P}+B_{P}(\vec{\theta} ; \mathcal{P}), \vec{\theta}
   $E_W(\mathcal{W})=||\mathcal{W}-\mathcal{W}_I||_F^2$
   	
 
-  #### Joint Regressor
+  Joint Regressor
 
   通过上面的优化过程可以得到训练集中每个人物的template mesh和joint location。但是如果我们想为新的人物预测其关节位置呢？文章中通过学习一个regressor matrix $ \mathcal{J}$预测Joint位置。$\mathcal{J}$通过非负最小二乘计算得到，并使权重加起来为1。这种方法使得计算joint的顶点是稀疏的，同时权重非负和加起来为1又使得预测的joint不会出现在mesh的外侧。
 
-  (2)Shape parameter training
+  #### (2)Shape parameter training
 
-  shape 空间是通过"mean and principal shape direction" $\{\overline{T},\mathcal{S}\}$来定义的。计算方法multi-pose数据集中shape做一个pose归一化，然后再运行PCA得到。
+  shape 空间是通过"mean and principal shape direction" $\{\overline{T},\mathcal{S}\}$来定义的。计算方法multi-shape数据集中shape做一个pose归一化，然后再运行PCA得到。
   pose归一化的过程是将数据集中的registration $ V_j^S$转换为一个处于rest pose $\vec{\theta^*} $下的registration $ \hat{T}_j^S $;转为rest pose这一步保证了pose和shape的建模不会相互影响。那么如何进行pose归一化呢？对于数据集中的一个一个registration  $V_j^S$,首先要估计它的姿势，也就是要寻找一个姿势表示$\vec{\theta}$
    使得经过这个参数变换后的mesh和原始的mesh的误差最小，也就是优化：
   $\vec{\theta}_j = \mathop{\arg\min}_{\vec{\theta}} \sum_{e}||W_e(\hat{T}_{\mu}^P+B_P(\vec{\theta};\mathcal{P})),\hat{J}_{mu}^P,\vec{\theta},\mathcal{W} - V_{j,e}^S||^2$
@@ -382,7 +378,7 @@ $E(\beta,\theta)=E_{J}\left(\boldsymbol{\beta}, \boldsymbol{\theta} ; K, J_{\tex
 
 $E_{J}\left(\boldsymbol{\beta}, \boldsymbol{\theta} ; K, J_{\text {est }}\right)=\sum_{\text {joint } i} w_{i} \rho\left(\Pi_{K}\left(R_{\theta}\left(J(\boldsymbol{\beta})_{i}\right)\right)-J_{\text {est }, i}\right)$ 
 
-关节点项惩罚2d关键点和投影关键点之间的距离。其中$\Pi_{K}$ 表示利用相机参数K,将3D关键点投影到2D关键点，$w_i$ 为上文提到的关键点的置信度。对于遮蔽的关键点，置信度往往是比较低的，在这种情况下pose是由 pose prior实现的。同时为了印制噪音，使用了鲁棒代价函数Geman-McClure ，$\rho$ .
+关节点项惩罚2d关键点和投影在SMPL关键点之间的距离。其中$\Pi_{K}$ 表示利用相机参数K,将3D关键点投影到2D关键点，$w_i$ 为上文提到的关键点的置信度。对于遮蔽的关键点，置信度往往是比较低的，在这种情况下pose是由 pose prior实现的。同时为了印制噪音，使用了鲁棒代价函数Geman-McClure ，$\rho$ .
 
 $E_{a}(\boldsymbol{\theta})=\sum_{i} \exp \left(\boldsymbol{\theta}_{i}\right)$ 
 
@@ -401,9 +397,13 @@ E_{\theta}(\boldsymbol{\theta}) \equiv-\log \sum_{j}\left(g_{j} \mathcal{N}\left
 
 capsule approximation:
 
+我们定义了一个惩罚互相贯穿的错误项（interpenetration），我们将错误项和胶囊之间的相交体积关联起来。因为胶囊之间的交集不好计算，所以我么使用球形来近似胶囊，球形的球心$C(\theta,\beta)$ ,球形的半径$r(\beta)$ 对应胶囊的半径。We consider a 3D isotropic Gaussian with $\sigma(\beta)=\frac{\gamma(\beta)}{3}$ for each sphere, and define the penalty as a scaled version of the integral of the product of Gaussians corresponding to “incompatible” parts。
+
 $E_{s p}(\boldsymbol{\theta} ; \boldsymbol{\beta})=\sum_{i} \sum_{j \in I(i)} \exp \left(\frac{\left\|C_{i}(\boldsymbol{\theta}, \boldsymbol{\beta})-C_{j}(\boldsymbol{\theta}, \boldsymbol{\beta})\right\|^{2}}{\sigma_{i}^{2}(\boldsymbol{\beta})+\sigma_{j}^{2}(\boldsymbol{\beta})}\right)$
 
 shape prior:
+
+(看不懂)
 
 $E_{\beta}(\boldsymbol{\beta})=\boldsymbol{\beta}^{T} \Sigma_{\beta}^{-1} \boldsymbol{\beta}$
 
@@ -411,7 +411,7 @@ $E_{\beta}(\boldsymbol{\beta})=\boldsymbol{\beta}^{T} \Sigma_{\beta}^{-1} \bolds
 
 #### Learning to Reconstruct 3D Human Pose and Shape via Model-fitting in the Loop（SPIN）
 
-
+[参考](https://blog.csdn.net/JerryZhang__/article/details/109535563)
 
 
 

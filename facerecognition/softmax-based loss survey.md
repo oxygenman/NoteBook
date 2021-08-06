@@ -258,9 +258,7 @@ s 越小，边界变化会越平缓。这样会使得每个类的点更加向类
 
 ArcFace认为角度余量比余弦余量更重要，所以对AM-Softmax进行了改进，得到如下loss函数：
 
-$L_{2}=-\frac{1}{m} \sum_{i=1}^{m} \log \frac{e^{\left\|x_{i}\right\| \cos \left(\theta_{y_{i}}\right)}}{e^{\left\|x_{i}\right\| \cos \left(\theta_{y_{i}}\right)}+\sum_{j=1, j \neq y_{i}}^{n} e^{\left\|x_{i}\right\| \cos \theta_{j}}}$ 
-
-再将margin加在角度中：
+将margin加在角度中：
 
 $L_{3}=-\frac{1}{N} \sum_{i=1}^{N} \log \frac{e^{s\left(\cos \left(\theta_{y_{i}}+m\right)\right)}}{e^{s\left(\cos \left(\theta_{y_{i}}+m\right)\right)}+\sum_{j=1, j \neq y_{i}}^{n} e^{s \cos \theta_{j}}}$
 
