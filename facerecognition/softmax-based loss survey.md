@@ -30,7 +30,7 @@ Softmax 能够放大微小的类别间的 logit 差异，这使得它对这些�
 
 softmax 与 crossentropy 结合组成了softmax loss.假设softmax的过程如下图所示：
 
-![img](/home/xy/pan/xy_workspace/git_workspace/notebook/facerecognition/softmax-based%20loss%20survey.assets/v2-7cb3f114d51b6a129d0075c06c9cb20b_720w.jpg)
+![v2-7cb3f114d51b6a129d0075c06c9cb20b_720w](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/v2-7cb3f114d51b6a129d0075c06c9cb20b_720w.jpg)
 
 符号定义如下：
 
@@ -246,7 +246,7 @@ s 越小，边界变化会越平缓。这样会使得每个类的点更加向类
 
 在$s=30$ 的基础上添加间隔项 m 的效果如下：
 
-<img src="/home/xy/pan/xy_workspace/git_workspace/notebook/facerecognition/softmax-based%20loss%20survey.assets/v2-d422709c943c40dd027da5c0fde57eb1_b-1626747337955.jpg" alt="img" style="zoom:50%;" />
+<img src="https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/v2-d422709c943c40dd027da5c0fde57eb1_b-1626747337955.jpg" alt="v2-d422709c943c40dd027da5c0fde57eb1_b-1626747337955" style="zoom:50%;" />
 
 
 
