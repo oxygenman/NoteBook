@@ -2,9 +2,141 @@
 
 ## 主要工作
 
+（1）给WIDER FACE 数据集标注了人脸关键点
+
+（2）添加了一个人自监督的人脸形状三维重建分支
+
+（3）在WIDER FACE hard test set上ap达到91.4%
+
+（4）提高了人脸verification的准确率 （TAR=89.59% for FAR=1e-6）
+
+（5）使用了轻量backbone
+
+(各种评价指标)https://zhuanlan.zhihu.com/p/87503403
+
 ## 实验结果
 
 ## 实现细节
+
+#### 整体网络架构
+
+![在这里插入图片描述](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/20201013213134781.png)
+
+![在这里插入图片描述](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/20201013213635452.png)
+
+![在这里插入图片描述](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/20201013213643304.png)
+
+![在这里插入图片描述](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/20201013213654758.png)
+
+![在这里插入图片描述](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/20201013213702246.png)
+
+#### 特征金字塔
+
+论文中使用resnet backbone的输出构建了5层的FPN,我们一般使用的的pytorch代码使用mobilenet 作为backbone,构建了3层的FPN.
+
+![img](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/v2-d136addbe3dc08f6cbae7233f753bf9a_720w.jpg)
+
+![img](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/v2-fe85fb352b9c212fb6d5416330fad9d2_720w.jpg)
+
+代码实现
+
+```python
+class FPN(nn.Module):
+    def __init__(self,in_channels_list,out_channels):
+        super(FPN,self).__init__()
+        leaky = 0
+        if (out_channels <= 64):
+            leaky = 0.1
+        self.output1 = conv_bn1X1(in_channels_list[0], out_channels, stride = 1, leaky = leaky)
+        self.output2 = conv_bn1X1(in_channels_list[1], out_channels, stride = 1, leaky = leaky)
+        self.output3 = conv_bn1X1(in_channels_list[2], out_channels, stride = 1, leaky = leaky)
+
+        self.merge1 = conv_bn(out_channels, out_channels, leaky = leaky)
+        self.merge2 = conv_bn(out_channels, out_channels, leaky = leaky)
+
+    def forward(self, input):
+        # names = list(input.keys())
+        input = list(input.values())
+        output1 = self.output1(input[0])
+        output2 = self.output2(input[1])
+        output3 = self.output3(input[2])
+
+        up3 = F.interpolate(output3, size=(int(output2.size(2)), int(output2.size(3))), mode="nearest")
+        #print("output2.size(2):",output2.size(2))
+        #print("output2.size(3):",output2.size(3))
+        #print("up3.size:",up3.size())
+        #up3 = F.interpolate(output3, size=[40, 40], mode="nearest")
+        output2 = output2 + up3
+        output2 = self.merge2(output2)
+
+        up2 = F.interpolate(output2, size=(int(output1.size(2)), int(output1.size(3))), mode="nearest")
+        #print("output1.size():",output1.size(2))
+        #print("output1.size(3):",output1.size(3))
+        #up2 = F.interpolate(output2, size=[80, 80], mode="nearest")
+        output1 = output1 + up2
+        output1 = self.merge1(output1)
+
+        out = [output1, output2, output3]
+        return out
+```
+
+
+
+#### ContextModule
+
+上下文模块来源于SSH和PyRamidBox.可以用来融合不同感受野，提高刚性上下文建模能力。并且retinaface还借鉴了WIDER  Face Challenge 2018冠军解决方案，将ContextModule中的3*3卷积替换成DCN(deformable convolution network).增强了非刚性建模能力。（我们在实际的pytorch代码中没有使用DCN）.
+
+![image-20210824153654710](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210824153654710.png)
+
+我们实际使用的context module 如上图所示。
+
+代码是先：
+
+```python
+class SSH(nn.Module):
+    #这里都是3*3卷积不要被名字骗了
+    def __init__(self, in_channel, out_channel):
+        super(SSH, self).__init__()
+        assert out_channel % 4 == 0
+        leaky = 0
+        if (out_channel <= 64):
+            leaky = 0.1
+        self.conv3X3 = conv_bn_no_relu(in_channel, out_channel//2, stride=1)
+        self.conv5X5_1 = conv_bn(in_channel, out_channel//4, stride=1, leaky = leaky)
+        self.conv5X5_2 = conv_bn_no_relu(out_channel//4, out_channel//4, stride=1)
+
+        self.conv7X7_2 = conv_bn(out_channel//4, out_channel//4, stride=1, leaky = leaky)
+        self.conv7x7_3 = conv_bn_no_relu(out_channel//4, out_channel//4, stride=1)
+
+    def forward(self, input):
+        conv3X3 = self.conv3X3(input)
+
+        conv5X5_1 = self.conv5X5_1(input)
+        conv5X5 = self.conv5X5_2(conv5X5_1)
+
+        conv7X7_2 = self.conv7X7_2(conv5X5_1)
+        conv7X7 = self.conv7x7_3(conv7X7_2)
+
+        out = torch.cat([conv3X3, conv5X5, conv7X7], dim=1)
+        out = F.relu(out)
+        return out
+```
+
+#### DCN
+
+![在这里插入图片描述](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy84OTA0NzIwLTUyYTI3MjgwMjhhZTRiYWEucG5n)
+
+可变形卷积就是先通过新加的一个卷积层来预测特征图上每个位置的偏移量，如上右图所示，偏移map的大小和原特征图一致，但是其维度为2维，因为涉及到x,y两个方向的偏移。偏移量往往不是整数，所以需要使用双线性插值来计算对应偏移位置的数值。双线性插值的计算过程如图所示。
+
+![在这里插入图片描述](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy84OTA0NzIwLTJkZmU2NjIxMDAyYTUyZjUucG5n)
+
+对于相邻的点来说x1-x0=1、y1-y0=1，所以可以继续简化成公式5
+
+![img](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy84OTA0NzIwLWUyNmFiYTRjNWQwNzlmZDUucG5n)
+
+#### Dense Regression Branch
+
+先重建出三维人脸，然后再将3维人脸根据相机参数投影到2d人脸上，并计算和原图的loss.具体过程因为复现代码中没有暂时略。
 
 #### Multibox loss的实现
 

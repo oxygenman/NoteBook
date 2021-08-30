@@ -537,5 +537,7 @@ $E_{\beta}(\boldsymbol{\beta})=\boldsymbol{\beta}^{T} \Sigma_{\beta}^{-1} \bolds
 
 [参考](https://blog.csdn.net/JerryZhang__/article/details/109535563)
 
+#### End-to-end Recovery of Human Shape and Pose
 
+The output mesh can be immediately used by animators, modified, measured, manipulated and retargeted.
 
