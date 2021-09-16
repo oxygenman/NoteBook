@@ -1,3 +1,3 @@
-### YOLO 开课吧笔记
+### YOLO
 
-1.掌握SIFT
+[yoloV2](https://zhuanlan.zhihu.com/p/47575929)

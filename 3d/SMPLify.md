@@ -10,11 +10,7 @@
 
 1.能够获得身体形状信息
 
-2.可以reason aboout interpenetration问题,即2d映射到3d的过程中会出现一些不可能的姿势。之前的一些工作使用3d棍图（stick figures）就可能出现这些问题。可以通过一个胶囊模型（“capsules”）来解决interpenetration的问题。
-
-为了解决pose的二义性，还需要pose prior.
-
-
+2.可以reason aboout interpenetration问题,即2d映射到3d的过程中会出现一些不可能的姿势。之前的一些工作使用3d棍图（stick figures）就可能出现这些问题。可以通过一个胶囊模型（“capsules”）来解决interpenetration的问题。为了解决pose的二义性，还需要pose prior.
 
 ### method:
 
@@ -38,6 +34,8 @@ $R_\theta(J(\beta)_i)$ :代表第$i$个3d关节点的坐标，表示加上pose�
 
 之前的模型会产生不合理的3d姿态，因为有些姿态回导致身体部位互穿的问题。但是直接使用SMPL人体模型去计算身体表面的互穿是不太可能的。在图形学领域，为了解决3d模型身体部位之间的互穿问题（interpenetration）。
 
+![image-20210908192658719](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210908192658719.png)
+
 往往通过使用代理近似几何体来解决，如上图所示，使用一堆“胶囊“来近似人体。每个胶囊都有半径和轴长。
 
 我们训练了一个回归模型，从shap参数回归出胶囊的（轴长和半径），并通过$R_\theta$ 控制胶囊模型的姿势。
@@ -57,6 +55,8 @@ $E_{J}\left(\boldsymbol{\beta}, \boldsymbol{\theta} ; K, J_{\text {est }}\right)
 $E_{a}(\boldsymbol{\theta})=\sum_{i} \exp \left(\boldsymbol{\theta}_{i}\right)$ 
 
  惩罚手肘和膝盖的不正常弯曲。因为在关节不弯曲的情况下，角度$\theta_i$ 是零，正常弯曲时角度为负，不正常弯曲时角度为正。
+
+![image-20210908192830471](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210908192830471.png)
 
 和之前的许多工作一样，使用CMU 数据集来训练pose prior.为了构造先验，我们使用MoSh将CMU marker data 拟合到SMPL,获得poses.然后使用一个混合高斯模型，去拟合100个subjects的100万姿势。
 

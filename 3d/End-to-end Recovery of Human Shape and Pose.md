@@ -58,6 +58,8 @@ $\min L\left(D_{i}\right)=\mathbb{E}_{\Theta \sim p_{\text {data }}}\left[\left(
 
 [gan网络的训练过程](https://zhuanlan.zhihu.com/p/246350294)
 
+具体的过程是，先使用已有的3d真数据作为正样本，3d回归网络生成的数据作为负样本，使用判别器损失函数训练一个二分类分类器，作为判别器。 再固定判别器使用$L_{adv}$训练生成器。  
+
 #### 网络结构：
 
 使用ResNet-50来提取图像特征；
