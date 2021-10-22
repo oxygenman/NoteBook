@@ -22,6 +22,8 @@
 
 ![img](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/1532329876793.png)
 
+[朴素贝叶斯后验概率最大化原理](https://blog.csdn.net/rea_utopia/article/details/78881415)
+
 贝叶斯定理：
 
 ### 决策树
