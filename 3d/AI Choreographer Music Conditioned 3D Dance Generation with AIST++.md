@@ -46,9 +46,33 @@ $X^{\prime} = (x_{T+1},...,x_{T'}) ; T'>>T$ .
 
 1. 模型的输入：
 
-训练时，模型的输入将原始数据随机裁剪成120帧的动作数据，和240帧的音乐数据，监督信号是未来20帧的动作数据。（这里我理解是两帧音乐对应一帧动作，但是在生成未来数据的时候就不需要音乐吗？）。
+训练时，模型的输入将原始数据随机裁剪成120帧的动作数据，和240帧的音乐数据，监督信号是未来20帧的动作数据。。
 
 测试时，输入120帧的舞蹈动作数据作为seed,然后输入音乐，生成了20帧未来动作，却只使用第一帧，并将第一帧append到输入上，循环运行模型。那生成20帧的意义何在？
+
+**音乐特征的提取:**
+
+音乐特征使用Librosa工具来提取，每帧音乐被转化成35维的特征向量。包括：
+
+1维的波封（envelope),
+
+20维的梅尔频率倒谱系数（MFCC）,
+
+10维的色度特征（chroma）,
+
+1维的峰值（peaks),
+
+1维的拍子（beats).
+
+**舞蹈动作特征：**
+
+舞蹈动作特征就是smpl模型的输入信息，包括：
+
+24个连接点的9维的旋转矩阵，
+
+一个3维的全局向量，
+
+一共219维的motion feature.
 
 2. FACT模型：
 
@@ -56,7 +80,7 @@ $X^{\prime} = (x_{T+1},...,x_{T'}) ; T'>>T$ .
 
    
 
-   两个模块儿分别生成了一个audio embeddings h^x_{1:T} 和motion embeddings h^y_{1:T'} ,然后将这两部分拼接在一起。然后送入所谓的跨模态Transformer,f_{cross} ,该模块儿直接输出结果，即未来的20帧动作X'。 该模块儿的结构仍然和前两个一样 ，还是经典transformer的full attention encoder模块儿，而不是decoder模块儿 。这里的设计也很疑惑。
+   两个模块儿分别生成了一个audio embeddings $h^x_{1:T}$ 和motion embeddings $h^y_{1:T'}$ ,然后将这两部分拼接在一起。然后送入所谓的跨模态Transformer,$f_{cross}$ ,该模块儿直接输出结果，即未来的20帧动作X'。 该模块儿的结构仍然和前两个一样 ，还是经典transformer的full attention encoder模块儿，而不是decoder模块儿 。这里的设计也很疑惑。
 
    ### 复现效果：
 
@@ -171,13 +195,49 @@ $C_s$ 表示结构损失，这个损失基于编舞学，就是一般重复的�
 
    有了关键帧之后,我们的目标是通过关键帧之间的数据生成动作曲线。因为一个关键点由位置（x,y,z）和旋转（x,y,z,w）组成，每一个坐标需要一个曲线，所以一共需要24x7个曲线。作者使用knots cubic Hermite spline[23]来拟合曲线。（过程略）
 
-关键帧生成：
+#### 关键帧生成：
+
+![image-20211026103849935](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20211026103849935.png)
 
 在测试阶段，我们是没有关键帧数据的，所以需要训练网络来生成关键帧数据。
 
-## 对于每一个beat,我们使用一个以它为中心的0.5s的hamming window.计算声音的MFCC特征并加上12维的chroma 特征。输入到encoder中，
+对于每一个beat,我们使用一个以它为中心的0.5s的hamming window.计算声音的MFCC特征并加上12维的chroma 特征。输入到encoder中，encoder和经典encoder一样使用self-attention机制提取全局特征。
 
- 
+而decoder部分不同于传统的transformer机制，使用了本文提出的MoTrans结构，该结构包含了本文提出的
+
+Learned Local Attention module (LLA) 和 Kinematic Chain Networks structure(KCN).
+
+我们期望的encoder-decoder 网络的作用是将音乐频谱空间的特征映射到动作空间，所以这里采用了对抗学习的结构，把transfomer当做生成器，而判别器的作用是判断生成器生成的关键帧是否适合输入的音乐。
+
+判别器的结构分为三部分，一个音乐特征embedding结构，输出的音乐特征会在时间维度上做一个average pooling,得到音乐的全局特征。还有一个key poses的特征提取结构，用来提取生成keypose的特征。两个特征会被拼接起来送入一个MLP模块，输出一个概率。三个结构都是3层全连接层。
+
+#### 动作曲线预测：
+
+动作曲线生成网络的结构和关键帧生成网络的结构类似，并且也是使用生成器和判别器的思想进行训练，训练的结果是生成两个关键帧之间的动作曲线需要的8个控制参数。
+
+#### MoTrans 网络结构
+
+KCN:
+
+![image-20211026135108044](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20211026135108044.png)
+
+KCN网络是基于身体结构构建的，如图所示24个关键点组成了一个树形拓扑结构，KCN由一个基本的block,FK-IK组成。FK和IK是两个相反的模块，如上图右所示，FK输入顺序是从根节点到叶子节点，而IK的输入顺序是从叶子节点到根节点。（这里的输入不太明白，论文也没提）。作者说，FK-IK模块的目的是将特征编码到运动控制参数空间，并且带来物理约束。如图2所示，KCN用在decoder的output embedding过程中和feed forward 过程中。
+
+LLA:
+
+![image-20211026143223242](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20211026143223242.png)
+
+LLA其实相当于给attention模块加了一个局部限制，使attention模块值关注于临近的区域。（这不是和transoformer提取全局特征的思想冲突了吗?）
+
+如上图左所示，在self attention 模块中分别给K矩阵和V矩阵加入Index Filter 和 Learned kernel在相乘。
+
+在这里，作者将kernel size设置为17，所以attention模块关注的是当前beat,前后8个beat的内容。
+
+#### Structured Multi-Head Attention
+
+
+
+
 
 参考：
 
