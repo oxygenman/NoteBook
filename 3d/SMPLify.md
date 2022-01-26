@@ -1,3 +1,5 @@
+[+smplify](https://blog.csdn.net/weixin_43955293/article/details/121583909)
+
 #### Keep it SMPL: Automatic Estimation of 3D Human Pose and Shape from a Single Image(SMPLify)
 
 ### Abstract:

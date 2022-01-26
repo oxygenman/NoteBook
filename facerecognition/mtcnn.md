@@ -109,7 +109,7 @@ $$
 
 - **pos,net,part数据的生成**：
 
-  其中，pos,net,part训练数据是根据gt的IOU大小决定的。
+  其中，pos,neg,part训练数据是根据gt的IOU大小决定的。
 
   - 对于pos样本，先根据gt，并产生随机偏移，iou和gt大于0.65被选为pos样本
   - 对于part样本，同样根据gt，并产生随机偏移，iou和gt在0.4～0.65被选为part样本
