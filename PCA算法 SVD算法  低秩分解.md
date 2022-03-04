@@ -5,3 +5,5 @@
 同一个线性变换，不同基下的矩阵，称为相似矩阵。
 
 https://blog.csdn.net/Dark_Scope/article/details/53150883
+
+[深入理解PCA和SVD](https://zhuanlan.zhihu.com/p/58064462)

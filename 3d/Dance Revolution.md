@@ -33,6 +33,8 @@ $\begin{aligned}
 h_{i} &=\operatorname{RNN}\left(h_{i-1}, \hat{y}_{i-1}\right)
 \end{aligned}$
 
+lstm hidden state 和 encoder的输入拼接
+
 先将用RNN生成decoder的hidden state,再将音乐当前帧的特征和rnn lstm的hidden state拼接，经过一层全连接层生成下一帧的动作。
 
 ### 动态学习策略
