@@ -6,3 +6,5 @@
 
 [ZCA白化和PCA白化](https://my.oschina.net/findbill/blog/543485)
 
+[BN详解](https://zhuanlan.zhihu.com/p/115949091)
+

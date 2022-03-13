@@ -1,3 +1,5 @@
+[活体检测](https://zhuanlan.zhihu.com/p/25401788)
+
 # Retinaface详解
 
 ## 主要工作
@@ -455,7 +457,7 @@ $$
 &=\log \left(\sum_{i=1}^{n} e^{x_{i}-c}\right)+c
 \end{aligned}
 $$
-这么做的目的是为了防止指数爆炸.
+这么做的目的是为了防止指数爆炸，出现上溢，c一般取$max(x_i)$.
 
 则 softmax loss 为
 

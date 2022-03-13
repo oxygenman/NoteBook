@@ -1,4 +1,4 @@
-## 2ResNeXt
+## ResNeXt
 
 https://zhuanlan.zhihu.com/p/32913695
 

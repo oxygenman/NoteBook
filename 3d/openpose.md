@@ -114,6 +114,8 @@ groundtruth是一张图中多个人相同部位独立的置信图通过max整合
 
 其中，![image-20210712172947031](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210712172947031.png)
 
+$d_{j_1} 和 d_{j_2}$ 表示坐标。
+
 实际的实现过程中，sampling and summing uniformly-spaced values of u.对u进行等间隔采样。我理解就是对每个点求一下两个向量的内积，然后相加。
 
 #### 将PAFs用在多人中：
