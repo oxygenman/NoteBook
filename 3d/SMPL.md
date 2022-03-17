@@ -160,9 +160,9 @@ smpl是一种从数据中学习到的模型，通过训练可以更好的拟合�
 
 #### 相关概念：
 
-**Blend Skinning ：**骨架子空间变形方法，将mesh上的点与骨架进行绑定，mesh上的每个vertex都以一定的权重和骨架相连，所以使用骨架可以控制mesh的形变，vetex受到与他相邻的估计的加权影响，这种影响可以通过LBS来实现。
+**Blend Skinning ：** 混合蒙皮，骨架子空间变形方法，将mesh上的点与骨架进行绑定，mesh上的每个vertex都以一定的权重和骨架相连，所以使用骨架可以控制mesh的形变，vetex受到与他相邻的估计的加权影响，这种影响可以通过LBS来实现。
 
-**Auto-rigging:**自动的生成LBS的权重，否则需要人工绑定。take a collection of meshes and infer the bones as well as the joints and blend weights 。
+**Auto-rigging:** 自动绑定，自动的生成LBS的权重，否则需要人工绑定。take a collection of meshes and infer the bones as well as the joints and blend weights 。
 
 **Blend shapes**:A blend shape is a vector of vertex displacements in a rest pose,blend shape 就是顶点相对rest template的偏移量。这种偏移可以由体型的变化引起，也有可能是因为身体姿态的改变引起，所以可以分为 shape blend shape 和 pose blend shape.
 
@@ -388,7 +388,7 @@ $\left.W\left(\hat{T}_{s(j)}^{P}+B_{P}(\vec{\theta} ; \mathcal{P}), \vec{\theta}
 
   （1）$E_D$
 
-  $\left.E_{D}\left(\hat{T}^{P}, \hat{J}^{P}, \mathcal{W}, \mathcal{P}, \Theta\right)=\sum_{j=1}^{P_{r e g}} \| V_{j}^{P}-W\left(\hat{T}_{s(j)}^{P}+B_{P}(\vec{\theta} ; \mathcal{P}), \vec{\theta}\right), \hat{J}_{s(j)}^{P}, \vec{\theta}, \mathcal{W}\right) \|^{2}$
+  $\left.E_{D}\left(\hat{T}^{P}, \hat{J}^{P}, \mathcal{W}, \mathcal{P}, \Theta\right)=\sum_{j=1}^{P_{r e g}} \| V_{j}^{P}-W\left(\hat{T}_{s(j)}^{P}+B_{P}(\vec{\theta} ; \mathcal{P}), \vec{\theta}\right), \hat{J}_{s(j)}^{P}, \vec{\theta}, \mathcal{W}\right) \|^{2}$ （14）
 
   其中：
 
@@ -417,6 +417,7 @@ $\left.W\left(\hat{T}_{s(j)}^{P}+B_{P}(\vec{\theta} ; \mathcal{P}), \vec{\theta}
 
   (4)$E_P$
 
+<<<<<<< HEAD
   为了防止pose-dependent blend shape的过拟合，这里对$\mathcal{P}$也做了一个正则化，使其趋向于0：
   
   $E_P(P)=||\mathcal{P}||_F^2$
@@ -432,22 +433,28 @@ $\left.W\left(\hat{T}_{s(j)}^{P}+B_{P}(\vec{\theta} ; \mathcal{P}), \vec{\theta}
   	
 
   Joint Regressor
+=======
+  为了防止pose-dependent blend sh
+
+    Joint Regressor
+>>>>>>> d0d64d343e2613e811e59918af3c7d08b5574db0
 
   通过上面的优化过程可以得到训练集中每个人物的template mesh和joint location。但是如果我们想为新的人物预测其关节位置呢？文章中通过学习一个regressor matrix $ \mathcal{J}$预测Joint位置。$\mathcal{J}$通过非负最小二乘计算得到，并使权重加起来为1。这种方法使得计算joint的顶点是稀疏的，同时权重非负和加起来为1又使得预测的joint不会出现在mesh的外侧。
 
   #### (2)Shape parameter training
 
   shape 空间是通过"mean and principal shape direction" $\{\overline{T},\mathcal{S}\}$来定义的。计算方法multi-shape数据集中shape做一个pose归一化，然后再运行PCA得到。
-  pose归一化的过程是将数据集中的registration $ V_j^S$转换为一个处于rest pose $\vec{\theta^*} $下的registration $ \hat{T}_j^S $;转为rest pose这一步保证了pose和shape的建模不会相互影响。那么如何进行pose归一化呢？对于数据集中的一个一个registration  $V_j^S$,首先要估计它的姿势，也就是要寻找一个姿势表示$\vec{\theta}$
-   使得经过这个参数变换后的mesh和原始的mesh的误差最小，也就是优化：
-  $\vec{\theta}_j = \mathop{\arg\min}_{\vec{\theta}} \sum_{e}||W_e(\hat{T}_{\mu}^P+B_P(\vec{\theta};\mathcal{P})),\hat{J}_{mu}^P,\vec{\theta},\mathcal{W} - V_{j,e}^S||^2$
-
+  要想进行pose归一化的过程是将数据集中的registration $ V_j^S$转换为一个处于rest pose $\vec{\theta^*} $下的registration $ \hat{T}_j^S $;转为rest pose这一步保证了pose和shape的建模不会相互影响。那么如何进行pose归一化呢？对于数据集中的一个一个registration  $V_j^S$,首先要估计它的姿势，也就是要寻找一个姿势表示$\vec{\theta}$
+  也就是优化：
+  $\vec{\theta}_j = \mathop{\arg\min}_{\vec{\theta}} \sum_{e}||W_e(\hat{T}_{\mu}^P+B_P(\vec{\theta};\mathcal{P})),\hat{J}_{mu}^P,\vec{\theta},\mathcal{W} - V_{j,e}^S||^2$ （15）
 
   其中：
 
-   $\hat{T}_{\mu}^P $是multi-pose数据集中的mean pose;
+  $W_{e}\left(\hat{\mathbf{T}}_{\mu}^{P}, \hat{\mathbf{J}}_{\mu}^{P}, \vec{\theta}, \mathcal{W}\right)$ 表示model生成的mesh的一条边。
+
+   $\hat{T}_{\mu}^P $是multi-pose数据集中的mean shape;
   $P \hat{J}_{\mu}^P $是multi-pose数据集中的mean joint location;
-  $V_{j,e}^S \in \mathbb{R}^3$“an edge of the registration”，是通过一对相邻顶点之间相减得到的，就是当前shape和mean shape的对应顶点坐标相减。通过对mesh中的所有的edge求和，可以在不知道人物具体的shape的情况下求得一个姿态的较好估计。
+  $V_{j,e}^S \in \mathbb{R}^3$“an edge of the registration”，是通过一对相邻顶点之间相减得到的，就是当前shape和mean shape的对应顶点坐标相减。通过对mesh中的所有的edge求和，可以在不知道人物具体的shape的情况下求得一个姿态的较好估计，我理解这里的$\mathcal{P}$ 应该是0，因为是mean shape.
   得到姿态 $\vec{T}_j^S$	之后，可以求 $\hat{T}_j^S$
 
   $\hat{T}_j^S = \mathop{\arg\min}_{\vec{T}}||W(\hat{T}+B_p(\vec{\theta}_j;\mathcal{P}),\mathcal{J}\hat{T},\vec{\theta},\mathcal{W}) - V_j^S||^2$
@@ -455,9 +462,21 @@ $\left.W\left(\hat{T}_{s(j)}^{P}+B_{P}(\vec{\theta} ; \mathcal{P}), \vec{\theta}
 
   然后在$\{\hat{T}_j^S\}_{j=1}^{S_{subj}}$ 上运行PCA,得到 $\{\overline{T},\mathcal{S}\}$PCA这一步是为了最大大rest pose下顶点偏移的可解释方差(explained variance)，同时使shape direction的数目较少。
 
+#### 优化过程总结
+
+1.使用式15的方法，初始化14的$\vec\theta_{j}$ .
+
+2.使用pose training 中的方法交替优化$\left\{\hat{\mathbf{T}}^{P}, \hat{\mathbf{J}}^{P}, \mathcal{W}, \mathcal{P}, \Theta\right\}$ .
+
+3.然后使用$\left\{\hat{\mathbf{J}}^{P}, \hat{\mathbf{T}}^{P}\right\}$ 获取$\mathcal{J}$ .
+
+4.在归一化的subjects $\left\{\hat{\mathbf{T}}_{j}^{S}\right\}_{j=1}^{S_{\text {subj }}}$ 使用PCA算法获得$\{\overline{\mathbf{T}}, \mathcal{S}\}$ .
+
 
 
  
+
+
 
 
 

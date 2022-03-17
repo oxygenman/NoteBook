@@ -1,5 +1,7 @@
 ## End-to-end Recovery of Human Shape and Pose
 
+[参考](https://www.cnblogs.com/X-Jun/p/14049168.html)
+
 ### 本文主要贡献：
 
 实现了HMR(Human Mesh Recovery) ,直接从一张RGB图像，重建出人体的3D mesh。
@@ -24,9 +26,9 @@ $\hat{X}_i$ 表示使用相机参数将3d关键点投影的2D关键点。
 
 $\hat{\mathbf{x}}=s \Pi(R X(\boldsymbol{\theta}, \boldsymbol{\beta}))+t$ 
 
-作者使用了一个weak-perspective 相机模型。使用3d回归模块生成的 global rotation$R\in\mathbb{3\times3}$ , translation $t\in\mathbb{R}^2$ 和 scale $s\in \mathbb{R}$ .所以一个人体模型可以由一个85维的向量$\Theta = {\theta,\beta,R,t,s}$ 表示.
+作者使用了一个weak-perspective 相机模型。使用3d回归模块生成的 global rotation$R\in\mathbb{3\times3}$ , translation $t\in\mathbb{R}^2$ 和 scale $s\in \mathbb{R}$ ,$\Pi$ 表示一个正交投影.所以一个人体模型可以由一个85维的向量$\Theta = {\theta,\beta,R,t,s}$ 表示.
 
-直接使用这种one go回归的方式是表困难的，所以作者采用了一种迭代的方式，将图像特征$\phi$ 和 $\Theta_t$ 同时输入到回归模块，并输出$\Delta\Theta_t$ .$\Theta_{t+1} = \Theta_t + \Delta\Theta_t$ .初始化$\Theta_0$ 被设置为$\Theta$的平均值。所以3D回归网络的输入是$[\phi,\Theta]$ .
+直接使用这种one go回归的方式是比较困难的，所以作者采用了一种迭代的方式，将图像特征$\phi$ 和 $\Theta_t$ 同时输入到回归模块，并输出$\Delta\Theta_t$ .$\Theta_{t+1} = \Theta_t + \Delta\Theta_t$ .初始化$\Theta_0$ 被设置为$\Theta$的平均值。所以3D回归网络的输入是$[\phi,\Theta]$ .
 
 另一方面，如果说存在3D ground truth的话。那就可以直接添加一个3D参数的损失。
 
@@ -42,7 +44,7 @@ $L_{3 \mathrm{D}}=L_{3 \mathrm{D} \mathrm{joints}}+L_{3 \mathrm{D} \mathrm{smpl}
 
 仅仅使用重投影损失是不够的，因为一些身体变形的情况，也会使重投影损失变小，所以需要一个判别器来判断生成的参数是否合理。因为SMPL模型的参数是可分解的，每个参数都有特定的意义，所以为了更稳定更有效率的训练，我们是用多个判别器来训练。
 
-首先是将体型和姿态的叛变分开，进一步将姿态每一个关键点再分开。所以判别器的输入有三种情况，体型判别器10-D for $\beta$ , 9-D for 每一个关键点， 9K-D for 全部关键点。
+首先是将体型和姿态的判别分开，进一步将姿态每一个关键点再分开。所以判别器的输入有三种情况，体型判别器10-D for $\beta$ , 9-D for 每一个关键点， 9K-D for 全部关键点。
 
 所以我们要训练K+2个判别器。每个判别器的输出between[0,1].
 

@@ -6,6 +6,7 @@
 
 https://blog.csdn.net/Dark_Scope/article/details/53150883
 
+<<<<<<< HEAD
 2.[PCA知乎讲解](https://zhuanlan.zhihu.com/p/32412043)
 
 3.[PCAB站讲解](https://www.bilibili.com/video/BV1E5411E71z?from=search&seid=1616609056191763735&spm_id_from=333.337.0.0)
@@ -35,3 +36,6 @@ SVD分解
 svd分解的物理意义 M代表一种线性变化，一组正交基，经过M的线性变化后依然垂直，只不过长度进行了缩放，方向发生了变化。
 
 $MV=U\Sigma$   V为原始正交基，$\Sigma$ 为变换后的空间的正交基
+=======
+[深入理解PCA和SVD](https://zhuanlan.zhihu.com/p/58064462)
+>>>>>>> d0d64d343e2613e811e59918af3c7d08b5574db0
