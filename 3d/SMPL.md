@@ -1,7 +1,5 @@
  
 
- 
-
 [三维数字人体模型](https://zhuanlan.zhihu.com/p/53072321)
 
 [rigging,skkinning的意思](https://blog.csdn.net/linjf520/article/details/89951103)
@@ -9,140 +7,6 @@
 [SMPL: A Skinned Multi-Person Linear Model论文解读](https://blog.csdn.net/JerryZhang__/article/details/103478265)
 
 [单目实时全身动作捕捉](https://zhuanlan.zhihu.com/p/374389244)
-
-### 什么是人体数字模型？
-
-早期人体模
-
-![image-20210810104043503](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810104043503.png)
-
-![image-20210810104123349](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810104123349.png)
-
-![image-20210810104205816](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810104205816.png)
-
-![image-20210810104251111](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810104251111.png)
-
-![image-20210810105445631](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810105445631.png)
-
-![image-20210810105531995](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810105531995.png)
-
-![image-20210810105615790](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810105615790.png)
-
-![image-20210810105641118](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810105641118.png)
-
-![image-20210810155312252](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810155312252.png)
-
-![image-20210810105909713](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810105909713.png)
-
-![image-20210810110239833](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810110239833.png)
-
-![image-20210810110302881](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810110302881.png)
-
-![image-20210810110346163](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810110346163.png)
-
-![image-20210810110514192](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810110514192.png)
-
-
-
-![image-20210810110801502](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810110801502.png)
-
-![image-20210810110823951](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810110823951.png)
-
-![image-20210810110852691](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810110852691.png)
-
-![image-20210810161005155](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810161005155.png)
-
-![image-20210810161125402](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810161125402.png)
-
-![image-20210810110700324](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810110700324.png)
-
-![image-20210810110933553](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810110933553.png)
-
-![image-20210810111342429](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810111342429.png)
-
-![image-20210810112215914](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810112215914.png)
-
-![image-20210810112320436](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810112320436.png)
-
-![image-20210810112453284](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810112453284.png)
-
-<video src="../../../../Desktop/屏幕录制 2021-08-10 下午2.27.54.mov"></video>
-
-![](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810112734284.png)
-
-![image-20210810112944427](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810112944427.png)
-
-![](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810113149977.png)
-
-![image-20210810113209223](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810113209223.png)
-
-![image-20210810113324752](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810113324752.png)
-
-
-
-### ![image-20210810113858429](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810113858429.png)
-
-![image-20210810122802401](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810122802401.png)
-
-![image-20210810122858663](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810122858663.png)
-
-![image-20210810123808445](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810123808445.png)
-
-
-
-![image-20210810123848663](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810123848663.png)
-
-![image-20210810123915412](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810123915412.png)
-
-![image-20210810124012955](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810124012955.png)
-
-<video src="../../../../Desktop/屏幕录制 2021-08-10 下午2.27.54.mov"></video>
-
-![image-20210810124141965](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810124141965.png)
-
-![image-20210810125010497](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810125010497.png)
-
-![image-20210810125034879](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810125034879.png)
-
-![image-20210810125750695](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810125750695.png)
-
-![image-20210810125826506](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810125826506.png)
-
-![image-20210810125912380](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810125912380.png)
-
-![image-20210810125950921](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810125950921.png)
-
-![image-20210810130021644](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810130021644.png)
-
-![image-20210810173408703](../../../../Library/Application Support/typora-user-images/image-20210810173408703.png)
-
-![image-20210810173608583](../../../../Library/Application Support/typora-user-images/image-20210810173608583.png)
-
-![image-20210810133952156](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810133952156.png)
-
-![image-20210810134213328](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810134213328.png)
-
-![image-20210810134315541](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810134315541.png)
-
-![](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810134315541.png)
-
-
-
-<video src="../../../../Desktop/屏幕录制 2021-08-10 下午2.05.32的副本.mov"></video>
-
-
-
-<video src="../../../../Desktop/屏幕录制 2021-08-10 下午2.10.29.mov"></video>
-
-![](../../../../Library/Application Support/typora-user-images/image-20210810141501072.png)
-
-![image-20210810141536031](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810141536031.png)
-
-![image-20210810194827722](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20210810194827722.png)
-
-![image-20210810141941204](../../../../Library/Application Support/typora-user-images/image-20210810141941204.png)
-
-<video src="../../../../Desktop/屏幕录制 2021-08-10 下午2.25.02.mov"></video>
 
 ### SMPL(skinned multi-person linear model)
 
@@ -160,7 +24,7 @@ smpl是一种从数据中学习到的模型，通过训练可以更好的拟合�
 
 #### 相关概念：
 
-**Blend Skinning ：** 混合蒙皮，骨架子空间变形方法，将mesh上的点与骨架进行绑定，mesh上的每个vertex都以一定的权重和骨架相连，所以使用骨架可以控制mesh的形变，vetex受到与他相邻的估计的加权影响，这种影响可以通过LBS来实现。
+**Blend Skinning ：** 混合蒙皮，骨架子空间变形方法，将mesh上的点与骨架进行绑定，mesh上的每个vertex都以一定的权重和骨架相连，所以使用骨架可以控制mesh的形变，vetex受到与他相邻的估计的加权影响，这种影响可以通过LBS实现。
 
 **Auto-rigging:** 自动绑定，自动的生成LBS的权重，否则需要人工绑定。take a collection of meshes and infer the bones as well as the joints and blend weights 。
 
@@ -419,7 +283,7 @@ $\left.W\left(\hat{T}_{s(j)}^{P}+B_{P}(\vec{\theta} ; \mathcal{P}), \vec{\theta}
 
 <<<<<<< HEAD
   为了防止pose-dependent blend shape的过拟合，这里对$\mathcal{P}$也做了一个正则化，使其趋向于0：
-  
+
   $E_P(P)=||\mathcal{P}||_F^2$
 
 
