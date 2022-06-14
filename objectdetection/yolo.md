@@ -17,3 +17,8 @@ yolo v1一个cell 只能预测一个物体。
 [NMS](https://blog.csdn.net/qq_38253797/article/details/117000288)
 
 [图像处理：五种插值法](https://blog.csdn.net/JNingWei/article/details/78822026)
+
+[边框回归公式解释](https://www.zhihu.com/question/445416676)
+
+[yolov5 loss.py](https://blog.csdn.net/qq_21539375/article/details/118345636#commentBox)
+
