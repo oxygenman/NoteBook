@@ -18,6 +18,43 @@ Mosaic 是将四张图片合成一张图片，可以变相增大batchsize
 
 3.分类的损失函数？回归的损失函数？
 4.梯度下降？几种优化器?
+
+[NAG详解](https://maimai.cn/article/detail?fid=1611261762&efid=QG9uqqsOrTdPa8hTbppqIg).
+
+[机器学习优化器总结](https://zhuanlan.zhihu.com/p/150113660)
+
+NAG(Nesterov Accelerated Gradient) NAG的本质上是多考虑了目标函数的二阶导信息
+
+NAG的原始形式：
+
+$\begin{aligned}
+d_{i} &=\beta d_{i-1}+g\left(\theta_{i-1}-\alpha \beta d_{i-1}\right) \\
+\theta_{i} &=\theta_{i-1}-\alpha d_{i}
+\end{aligned}$ 
+
+可以变化为：
+
+$\begin{array}{l}
+d_{i}=\beta d_{i-1}+g\left(\theta_{i-1}\right)+\beta\left[g\left(\theta_{i-1}\right)-g\left(\theta_{i-2}\right)\right] \\
+\theta_{i}=\theta_{i-1}-\alpha d_{i}
+\end{array}$ 
+
+
+
+相比于原始的momentum 多了后面一项，直观的理解的话，除了考虑动量和梯度，还要考虑上两次梯度的差值。如果插值和动量方向一直就再进一步，如果不一致则减缓动量。
+
+
+
+Adagrad 是一种自适应学习率的方法，通过引入梯度平方的累加和，来缩放学习率。对于梯度更新较多的降低较多学习率，对于梯度更新较小的，降低较小学习率，直到学习率降为0.
+
+所以Adagrad的缺点在于随着迭代次数增多，学习率会越来越小。
+
+
+
+RMSprop采用指数衰减平均的方式取代Adgrad取代所有梯度历史平方值的总和的平方根。
+
+Adam 结合了momentum和RMSprop,同时对梯度进行一阶矩估计和二阶矩估计。
+
 5.几种归一化方法？
 
 6.各种评价指标？
