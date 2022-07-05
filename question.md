@@ -1,5 +1,7 @@
 1.目标检测中数据增强的方法有哪些？优缺点？
 
+[数据增强包](https://www.freesion.com/article/13111107879/#CoarseDropout%C2%A0%E5%9C%A8%E5%9B%BE%E5%83%8F%E4%B8%8A%E7%94%9F%E6%88%90%E7%9F%A9%E5%BD%A2%E5%8C%BA%E5%9F%9F)
+
 [CV中有哪些数据增强方法](https://www.zhihu.com/question/319291048/answer/2258940108)
 
 cutout 就是将图像切去一块儿 可以用来增强数据遮挡的情况
