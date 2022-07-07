@@ -237,7 +237,7 @@ $L_{s c}=L_{\text {coarse }}\left(I_{i}, \mathcal{R}\left(M\left(\boldsymbol{\be
 
 细节渲染：
 
-为了得到具有细节的M‘，我们将M和他的normal map，转化的UV 空间，
+为了得到具有细节的M‘，我们将M和他的normal map，转化到UV 空间，
 
 $M_{u v}^{\prime}=M_{u v}+D \odot N_{u v}$ 
 
@@ -257,7 +257,28 @@ ID-MRF loss:
 
 隐式多元马尔科夫随机场损失.用来惩罚生成图像中的每个patch只和target中大部分的patch比较相似的情况，所以能够恢复出细节。
 
-![image-20220519172402857](/home/xy/pan/xy_workspace/git_workspace/notebook/3d/BFM.assets/image-20220519172402857.png)
+要计算ID-MRF损失，可以简单地使用直接相似度度量(如余弦相似度)来找到生成内容中的补丁的最近邻居。但这一过程往往产生平滑的结构，因为一个平坦的区域容易连接到类似的模式，并迅速减少结构的多样性。我们采用相对距离度量[17,16,22]来建模局部特征与目标特征集之间的关系。它可以恢复如图3(b)所示的细微细节。
+![在这里插入图片描述](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/20210522160236955.png)
+
+具体地，用$Y g ∗ $ 代表对缺失区域的修复结果的内容，$ Y_g^{*L}$和 $Y^L$ 分别代表来自预训练模型的第L层的特征。
+
+patch v和s分别来自$ Y_g^{*L}$和$ Y^L$ ,定义v与s的相对相似度为：
+
+$\operatorname{RS}(\mathbf{v}, \mathbf{s})=\exp \left(\left(\frac{\mu(\mathbf{v}, \mathbf{s})}{\max _{\mathbf{r} \in \rho_{\mathbf{s}}\left(\mathbf{Y}^{L}\right)} \mu(\mathbf{v}, \mathbf{r})+\epsilon}\right) / h\right)$ 
+
+这里$\mu()$ 是计算余弦相似度。$r\in\rho_s(Y^L)$ 意思是r是$Y^L$ 中除了sd的其他patch.h和$\epsilon$ 是两个超参数常数。仔细观察这个相对相似度和原始相似度的关系，会发现如果最高的相似度作为分母的话，那相对相似度就会变小，也就是小的更小，大的更大。接下来：RS(v,s)归一化为：
+
+$\overline{\mathrm{RS}}(\mathbf{v}, \mathbf{s})=\operatorname{RS}(\mathbf{v}, \mathbf{s}) / \sum_{\mathbf{r} \in \rho_{\mathbf{s}}\left(\mathbf{Y}^{L}\right)} \mathrm{RS}(\mathbf{v}, \mathbf{r})$
+
+最后，根据上式，最终的ID-MRF损失被定义为：
+
+$\mathcal{L}_{M}(L)=-\log \left(\frac{1}{Z} \sum_{\mathbf{s} \in \mathbf{Y}^{L}} \max _{\mathbf{v} \in \hat{\mathbf{Y}}_{g}^{L}} \overline{\mathrm{RS}}(\mathbf{v}, \mathbf{s})\right)$
+
+一个极端的例子$Y_g^{*L}$ 中的所有patch都非常接近目标中的一个patch s.而对于其他的patch r $max_vRS(v,r)$ 就会变小。$L_m$ 就会变大。
+
+另一方面，$Y^L$中的每一个patch r 在$Y_g^{*L}$ 中有一个唯一的最近邻。那么结果就是RS(v,r)变大。$L_m$就会变小。
+
+从这个观点触发，最小化，LM(L)鼓励$Y_g*^{L}$ 中的每一个patch v都匹配Y^L中不同的patch.是的变得多样化。
 $$
 L_{m r f}=2 L_{M}\left({ conv4_2) }+L_{M}({ conv3_2 })\right.
 $$
