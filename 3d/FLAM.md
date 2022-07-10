@@ -12,11 +12,21 @@ $\begin{array}{l}M(\vec{\beta}, \vec{\theta}, \vec{\psi}): \mathbb{R}|\vec{\beta
 
 模型输入三种参数，就能得到5023个顶点坐标。
 
+$\beta$ 表示形状参数
+
+$\theta$ 表示姿态参数
+
+$\psi$ 表示表情参数
+
 和SMPL模型一样，FLAM的组成部分有： template mesh, shape blend shape,pose blend shape,expression blend shape.
 
 所以最终的模型是：
 
 $\begin{array}{c}M(\vec{\beta}, \vec{\theta}, \vec{\psi})=W\left(T_{P}(\vec{\beta}, \vec{\theta}, \vec{\psi}), \mathbf{J}(\vec{\beta}), \vec{\theta}, \mathcal{W}\right) \\ \text { where } \\ T_{P}(\vec{\beta}, \vec{\theta}, \vec{\psi})=\overline{\mathbf{T}}+B_{S}(\vec{\beta} ; \mathcal{S})+B_{P}(\vec{\theta} ; \mathcal{P})+B_{E}(\vec{\psi} ; \mathcal{E})\end{array}$
+
+这个模型怎么理解呢？
+
+通过形状，姿态和表情参数以及一个均值模板可以得到一个特定人脸的静态3D模型，这个时候的人脸处在一个标准的姿态下。要想使头部的姿态发生变化，通过形状参数可以获得 0 pose,即一个标准姿态下人脸的关节点位置，然后再通过姿态参数$\theta$ 可以获取当前姿态下关节点的位置，然后再通过LBS,即当前的关节点位置×W,获得顶点的坐标。
 
 #### (1)shape blendshapes
 
@@ -31,6 +41,8 @@ $B_{P}(\vec{\theta} ; \mathcal{P})=\sum_{n=1}^{9 K}\left(R_{n}(\vec{\theta})-R_{
 $\begin{array}{l} \mathbf{P}_{n} \in \mathbb{R}^{3 N} \text { describes the vertex offsets from } \\ \text { the rest pose activated by } R_{n}, \text { and the pose space } \mathcal{P}=\left[\mathbf{P}_{1}, \cdots, \mathbf{P}_{9 K}\right] \in \mathbb{R}^{3 N \times 9 K} \end{array}$ 
 
 包含所有的pose blend shapes.
+
+$\mathcal{P}$可以看做一种形式的权重
 
 这里的$\mathcal{P}$ 是直接定义损失函数训练出来的。
 
