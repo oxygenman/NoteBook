@@ -39,17 +39,11 @@ d_{i}=\beta d_{i-1}+g\left(\theta_{i-1}\right)+\beta\left[g\left(\theta_{i-1}\ri
 \theta_{i}=\theta_{i-1}-\alpha d_{i}
 \end{array}$ 
 
-
-
 相比于原始的momentum 多了后面一项，直观的理解的话，除了考虑动量和梯度，还要考虑上两次梯度的差值。如果插值和动量方向一直就再进一步，如果不一致则减缓动量。
-
-
 
 Adagrad 是一种自适应学习率的方法，通过引入梯度平方的累加和，来缩放学习率。对于梯度更新较多的降低较多学习率，对于梯度更新较小的，降低较小学习率，直到学习率降为0.
 
 所以Adagrad的缺点在于随着迭代次数增多，学习率会越来越小。
-
-
 
 RMSprop采用指数衰减平均的方式取代Adgrad取代所有梯度历史平方值的总和的平方根。
 
@@ -57,7 +51,16 @@ Adam 结合了momentum和RMSprop,同时对梯度进行一阶矩估计和二阶�
 
 5.几种归一化方法？
 
+[归一化 标准化 白化](https://zhuanlan.zhihu.com/p/475106090)
+
 6.各种评价指标？
+
+[机器学习 F1-Score, recall, precision_Matrix_11的博客-CSDN博客_fi score](https://blog.csdn.net/matrix_space/article/details/50384518)
+
+[目标检测评价指标](https://zhuanlan.zhihu.com/p/88896868)
 
 7.如何解决小目标检测的问题？
 
+https://zhuanlan.zhihu.com/p/121666693
+
+https://zhuanlan.zhihu.com/p/83220498
