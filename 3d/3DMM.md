@@ -282,6 +282,10 @@ $\mathcal{L}_{M}(L)=-\log \left(\frac{1}{Z} \sum_{\mathbf{s} \in \mathbf{Y}^{L}}
 $$
 L_{m r f}=2 L_{M}\left({ conv4_2) }+L_{M}({ conv3_2 })\right.
 $$
+lmrf的影响
+
+![image-20220707153413867](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20220707153413867.png)
+
 Soft symmetry loss：
 
 对称损失，增加遮挡的损失。
@@ -312,7 +316,7 @@ $L_{dc}$ 对模型的影响。
 
 
 
-
+![image-20220707153334694](https://xy-cloud-images.oss-cn-shanghai.aliyuncs.com/img/image-20220707153334694.png)
 
 
 
