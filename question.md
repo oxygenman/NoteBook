@@ -66,3 +66,8 @@ Adam 结合了momentum和RMSprop,同时对梯度进行一阶矩估计和二阶�
 https://zhuanlan.zhihu.com/p/121666693
 
 https://zhuanlan.zhihu.com/p/83220498
+
+８．ｍtcnn和retinaface的优缺点？
+
+9.混淆矩阵
+
