@@ -17,3 +17,7 @@ yolo v1一个cell 只能预测一个物体。
 [NMS](https://blog.csdn.net/qq_38253797/article/details/117000288)
 
 https://blog.csdn.net/JNingWei/article/details/78822026
+
+[Focal Loss的理解以及在多分类任务上的使用(Pytorch)_GHZhao_GIS_RS的博客-CSDN博客_focal loss 多分类](https://blog.csdn.net/u014311125/article/details/109470137)
+
+[一文搞懂交叉熵损失 - Brook_icv - 博客园](https://www.cnblogs.com/wangguchangqing/p/12068084.html#autoid-0-2-0)
