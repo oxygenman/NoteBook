@@ -59,6 +59,10 @@ Adam 结合了momentum和RMSprop,同时对梯度进行一阶矩估计和二阶�
 
 [目标检测评价指标](https://zhuanlan.zhihu.com/p/88896868)
 
+人脸识别评价指标：
+
+[知乎人脸评价指标](https://www.zhihu.com/question/46974342/answer/1373366894)
+
 7.如何解决小目标检测的问题？
 
 https://zhuanlan.zhihu.com/p/121666693
